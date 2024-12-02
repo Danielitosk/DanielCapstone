@@ -12,9 +12,11 @@ let playerY = 0;
 let hero;
 let player;
 
+
 function preload() {
   forest = loadImage('assets/background.webp');
-  player = loadImage('assets/maincharacter.jpg');
+  player = loadImage('assets/maincharacter.png');
+  npc1 = loadImage('assets/meleenpc.jpg');
 }
 
 function setup() {
@@ -39,9 +41,9 @@ class Character {
   }
 
   display() {
-    rectMode(CENTER);
-    rect(this.x, this.y + 45, 30, 60);
-    ellipse(this.x, this.y, 45);
+    
+    imageMode(CENTER);
+    image(player,this.x,this.y,120,140);
   }
 
   move() {  // player movement and check for borders in the canvas 
@@ -74,5 +76,3 @@ class Character {
     }
   }
 }
-
-// this.x>20
