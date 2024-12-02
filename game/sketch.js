@@ -16,7 +16,8 @@ let player;
 function preload() {
   forest = loadImage('assets/background.webp');
   player = loadImage('assets/maincharacter.png');
-  npc1 = loadImage('assets/meleenpc.jpg');
+  npc1 = loadImage('assets/meleenpc.png');
+  npc2 = loadImage('assets/ranged.png');
 }
 
 function setup() {
@@ -44,6 +45,8 @@ class Character {
     
     imageMode(CENTER);
     image(player,this.x,this.y,120,140);
+    image(npc1,20,20,120,120);
+    image(npc2,140,140,120,120);
   }
 
   move() {  // player movement and check for borders in the canvas 
