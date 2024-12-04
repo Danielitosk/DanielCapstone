@@ -11,18 +11,21 @@ let playerX = 0;
 let playerY = 0;
 let hero;
 let player;
+let npc1;
+let npc2;
 
 
 function preload() {
   forest = loadImage('assets/background.webp');
   player = loadImage('assets/maincharacter.png');
-  npc1 = loadImage('assets/meleenpc.png');
+  npc1 = loadImage('assets/meleenpc.png ');
   npc2 = loadImage('assets/ranged.png');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   hero = new Character();
+  
 }
 
 
@@ -32,6 +35,7 @@ function draw() {
   image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
   hero.display();
   hero.move();
+
 }
 
 class Character {
@@ -42,11 +46,10 @@ class Character {
   }
 
   display() {
-    
+
     imageMode(CENTER);
-    image(player,this.x,this.y,120,140);
-    image(npc1,20,20,120,120);
-    image(npc2,140,140,120,120);
+    image(player, this.x, this.y, 120, 140);
+
   }
 
   move() {  // player movement and check for borders in the canvas 
@@ -61,21 +64,49 @@ class Character {
       if (keyCode === 65) {  // move to the left
         this.x -= 6;
         if (this.x <= 20) {     // check left border
-          this.x = 20;      
+          this.x = 20;
         }
       }
       if (keyCode === 83) {  // move down
         this.y += 6;
         if (this.y >= windowHeight - 40) {   // check lower border
-          this.y = windowHeight-40;
+          this.y = windowHeight - 40;
         }
       }
       if (keyCode === 87) {  //move up
         this.y -= 6;
-        if (this.y <=  20) {    // check upper border
+        if (this.y <= 20) {    // check upper border
           this.y = 20;
         }
       }
     }
   }
+}
+
+class Melee {       // melee npcs
+  constructor(x, y) {
+    this.x = width / 2;
+    this.y = height / 2;
+
+  }
+
+  display() {
+    imageMode(CENTER);
+    image(npc1, 20, 20, 120, 120);
+  }
+
+}
+
+class Ranged {       // ranged npc
+  constructor(x, y) {
+    this.x = width / 2;
+    this.y = height / 2;
+
+  }
+
+  display() {
+    imageMode(CENTER);
+    image(npc2, 140, 140, 120, 120);
+  }
+
 }
