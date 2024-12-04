@@ -11,8 +11,11 @@ let playerX = 0;
 let playerY = 0;
 let hero;
 let player;
+
 let npc1;
 let npc2;
+let enemiesM= [];
+let enemiesR= [];
 
 
 function preload() {
@@ -25,7 +28,9 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   hero = new Character();
-  
+  for (let i=0; i<100; i++){
+    enemiesM[i] = new Melee();
+  }
 }
 
 
@@ -35,7 +40,9 @@ function draw() {
   image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
   hero.display();
   hero.move();
-
+  for (let i=0; i<100; i++){
+    enemiesM[i].display();
+  }  
 }
 
 class Character {
@@ -92,7 +99,7 @@ class Melee {       // melee npcs
 
   display() {
     imageMode(CENTER);
-    image(npc1, 20, 20, 120, 120);
+    image(npc1, this.x, this.y, 120, 120);
   }
 
 }
@@ -106,7 +113,7 @@ class Ranged {       // ranged npc
 
   display() {
     imageMode(CENTER);
-    image(npc2, 140, 140, 120, 120);
+    image(npc2, this.x, this.y, 120, 120);
   }
 
 }
