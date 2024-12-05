@@ -14,8 +14,9 @@ let player;
 
 let npc1;
 let npc2;
-let enemiesM= [];
-let enemiesR= [];
+let enemiesM = [];
+let enemiesR = [];
+let startTimer = 0;
 
 
 function preload() {
@@ -28,8 +29,16 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   hero = new Character();
-  for (let i=0; i<100; i++){
-    enemiesM[i] = new Melee();
+  spawnMele();
+  for (let i = 0; i < 10; i++) {
+    enemiesR.push(new Ranged(random(width), 20));
+  }
+}
+
+
+function spawnMele() {
+  for (let i = 0; i < 10; i++) {
+    enemiesM.push(new Melee(random(width), 20));
   }
 }
 
@@ -40,9 +49,18 @@ function draw() {
   image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
   hero.display();
   hero.move();
-  for (let i=0; i<100; i++){
+  for (let i = 0; i < enemiesM.length; i++) {
     enemiesM[i].display();
-  }  
+  }
+  for (let i = 0; i < 10; i++) {
+    enemiesR[i].display();
+  }
+  let ellapseTime = millis() - startTimer;
+  if (ellapseTime > 4000) {
+    spawnMele();
+    startTimer = millis();
+  }
+
 }
 
 class Character {
@@ -53,7 +71,6 @@ class Character {
   }
 
   display() {
-
     imageMode(CENTER);
     image(player, this.x, this.y, 120, 140);
 
@@ -87,13 +104,15 @@ class Character {
         }
       }
     }
+
   }
+
 }
 
 class Melee {       // melee npcs
   constructor(x, y) {
-    this.x = width / 2;
-    this.y = height / 2;
+    this.x = x;
+    this.y = y;
 
   }
 
@@ -106,14 +125,19 @@ class Melee {       // melee npcs
 
 class Ranged {       // ranged npc
   constructor(x, y) {
-    this.x = width / 2;
-    this.y = height / 2;
+    this.x = x;
+    this.y = y;
 
   }
 
   display() {
     imageMode(CENTER);
-    image(npc2, this.x, this.y, 120, 120);
+    image(npc2, this.x, windowHeight - 50, 120, 120);
+  }
+  move() {
+    if (ellapseTime > 4000) {
+      this.x +=20;
+    }
   }
 
 }
