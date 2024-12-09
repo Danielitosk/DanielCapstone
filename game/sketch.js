@@ -16,7 +16,10 @@ let npc1;
 let npc2;
 let enemiesM = [];
 let enemiesR = [];
+let ball=[];
 let startTimer = 0;
+let rangedWidth;
+let rangedHeight;
 
 
 function preload() {
@@ -30,16 +33,31 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   hero = new Character();
   spawnMele();
+  spawnRanged();
   for (let i = 0; i < 10; i++) {
-    enemiesR.push(new Ranged(random(width), 20));
+    let rangedWidth= 100+i*190;
+    ball.push(new Lightball(rangedWidth, 900));
   }
+
 }
 
+function spawnRanged(){
+  
+  for (let i = 0; i < 1000; i++) {
+    let rangedWidth= 100+i*190;
+    enemiesR.push(new Ranged(rangedWidth, rangedHeight));
+  }
+  
+}
 
 function spawnMele() {
   for (let i = 0; i < 10; i++) {
     enemiesM.push(new Melee(random(width), 20));
   }
+}
+
+function shoot() {
+  
 }
 
 
@@ -49,6 +67,9 @@ function draw() {
   image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
   hero.display();
   hero.move();
+  for (let i = 0; i < 10; i++){
+    ball[i].display();
+  }
   for (let i = 0; i < enemiesM.length; i++) {
     enemiesM[i].display();
   }
@@ -60,7 +81,8 @@ function draw() {
     spawnMele();
     startTimer = millis();
   }
-
+ 
+  
 }
 
 class Character {
@@ -93,8 +115,8 @@ class Character {
       }
       if (keyCode === 83) {  // move down
         this.y += 6;
-        if (this.y >= windowHeight - 40) {   // check lower border
-          this.y = windowHeight - 40;
+        if (this.y >= windowHeight - 175) {   // check lower border
+          this.y = windowHeight - 175;
         }
       }
       if (keyCode === 87) {  //move up
@@ -135,9 +157,31 @@ class Ranged {       // ranged npc
     image(npc2, this.x, windowHeight - 50, 120, 120);
   }
   move() {
+    let ellapseTime = millis() - startTimer;
     if (ellapseTime > 4000) {
-      this.x +=20;
+      this.x + 10;
+      startTimer = millis();
     }
   }
 
+}
+
+class Lightball {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+
+  }
+
+  display() {
+    noStroke();
+    fill('cyan');
+    ellipse(this.x, this.y, 30, 25);
+  }
+
+  move() {
+
+    this.y = this.y - 5;
+
+  }
 }
