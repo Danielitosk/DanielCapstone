@@ -16,10 +16,11 @@ let npc1;
 let npc2;
 let enemiesM = [];
 let enemiesR = [];
-let ball=[];
+let ball = [];
 let startTimer = 0;
 let rangedWidth;
 let rangedHeight;
+let spells = [];
 
 
 function preload() {
@@ -32,22 +33,25 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   hero = new Character();
+  spells = new Spell();
   spawnMele();
   spawnRanged();
+
   for (let i = 0; i < 10; i++) {
-    let rangedWidth= 100+i*190;
+    let rangedWidth = 100 + i * 190;
     ball.push(new Lightball(rangedWidth, 900));
   }
 
+
 }
 
-function spawnRanged(){
-  
+function spawnRanged() {
+
   for (let i = 0; i < 1000; i++) {
-    let rangedWidth= 100+i*190;
+    let rangedWidth = 100 + i * 190;
     enemiesR.push(new Ranged(rangedWidth, rangedHeight));
   }
-  
+
 }
 
 function spawnMele() {
@@ -56,9 +60,6 @@ function spawnMele() {
   }
 }
 
-function shoot() {
-  
-}
 
 
 function draw() {
@@ -67,7 +68,7 @@ function draw() {
   image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
   hero.display();
   hero.move();
-  for (let i = 0; i < 10; i++){
+  for (let i = 0; i < 10; i++) {
     ball[i].display();
   }
   for (let i = 0; i < enemiesM.length; i++) {
@@ -81,8 +82,13 @@ function draw() {
     spawnMele();
     startTimer = millis();
   }
- 
-  
+  spells.display();
+  spells.move();
+  spells.mousePressed();
+
+
+
+
 }
 
 class Character {
@@ -97,6 +103,8 @@ class Character {
     image(player, this.x, this.y, 120, 140);
 
   }
+
+
 
   move() {  // player movement and check for borders in the canvas 
 
@@ -127,6 +135,60 @@ class Character {
       }
     }
 
+  }
+
+}
+class Spell {    //MY SPELL
+  constructor(x, y, move) {
+    this.x = width / 2;
+    this.y = height / 2;
+
+  }
+  display() {
+    noStroke();
+    fill('crimson');
+    ellipse(this.x, this.y, 25, 20);
+  }
+
+
+  move() {  // MOVES WITH THE CHARACTER
+
+    if (keyIsPressed) {
+      if (keyCode === 68) {  // move to the right
+        this.x += 6;
+        if (this.x >= windowWidth - 20) {     // check right border
+          this.x = windowWidth - 20;
+        }
+      }
+      if (keyCode === 65) {  // move to the left
+        this.x -= 6;
+        if (this.x <= 20) {     // check left border
+          this.x = 20;
+        }
+      }
+      if (keyCode === 83) {  // move down
+        this.y += 6;
+        if (this.y >= windowHeight - 175) {   // check lower border
+          this.y = windowHeight - 175;
+        }
+      }
+      if (keyCode === 87) {  //move up
+        this.y -= 6;
+        if (this.y <= 20) {    // check upper border
+          this.y = 20;
+        }
+      }
+    }
+
+  }
+  mousePressed(){
+    if (mouseIsPressed){
+      this.y=mouseY;
+      this.x= mouseX;
+
+      
+      
+    }
   }
 
 }
@@ -185,3 +247,4 @@ class Lightball {
 
   }
 }
+
