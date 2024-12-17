@@ -22,7 +22,7 @@ let rangedWidth;
 let rangedHeight;
 let spells = [];
 let melee = [];
-let r= 60;
+let r = 60;
 
 
 function preload() {
@@ -60,9 +60,7 @@ function spawnMele() {
   }
 }
 
-function mousePressed() {
-  spells.push(new Spell(hero.x, hero.y));
-}
+
 
 
 function draw() {
@@ -90,12 +88,10 @@ function draw() {
   for (let i = 0; i < spells.length; i++) {
     spells[i].display();
     spells[i].move();
-    for (let s = 0; s < spells.length; s++) {
-      if (spells[i].hits(enemiesM[s])) {
-        enemiesM[s].dissapear();
-      }
-    }
+   
   }
+
+  print(currentMouseX, currentMouseY);
 
 }
 
@@ -108,7 +104,7 @@ class Character {
 
   display() {
     imageMode(CENTER);
-    image(player, this.x, this.y, r*2, r*2+20);
+    image(player, this.x, this.y, r * 2, r * 2 + 20);
 
   }
 
@@ -146,24 +142,61 @@ class Character {
   }
 
 }
-class Spell {    //MY SPELL
-  constructor(x, y, move) {
-    this.pos = createVector(x, y);
 
+
+// clicking function to give spell a direction to go
+let currentMouseX = 0;
+let currentMouseY = 0;
+function mousePressed() {
+  currentMouseX = mouseX;
+  currentMouseY = mouseY;
+  spells.push(new Spell(hero.x, hero.y));
+}
+
+
+class Spell {    //MY SPELL
+  constructor(x,y) {
+    this.pos = createVector(x, y);
+    this.target = createVector(mouseX-this.pos.x,mouseY-this.pos.y);
+    this.target.normalize();
+    this.target.mult(5);
   }
 
   display() {
     noStroke();
     fill('crimson');
-    ellipse(this.pos.x, this.pos.y, r/2, 2/3);
+    ellipse(this.pos.x, this.pos.y, r / 2, r / 3);
+    if (this.pos.x !== currentMouseX){
+      if(this.pos.y !== currentMouseY){
+        this.pos.add(this.target);
+      }
+    }
+    this.pos.add(this.target);
+    // if(this.pos.x !== currentMouseX){
+    //   if(this.pos.x < currentMouseX){
+    //     this.pos.x +=10;
+    //   }
+    //   else{ 
+    //     this.pos.x -=10;
+    //   }
+    // }
+    // if(this.pos.y !== currentMouseY){
+    //   if(this.pos.y < currentMouseY){
+    //     this.pos.y +=10;
+    //   }
+    //   else{
+    //     this.pos.y -=10;
+    //   }
+    // }
+
   }
 
   hits(enemiesM) {
     let d = dist(this.x, this.y, enemiesM.x, enemiesM.y);
-    if (d < this.r+enemiesM.r){
+    if (d < this.r + enemiesM.r) {
       return true;
     }
-    else{
+    else {
       return false;
     }
   }
@@ -182,16 +215,16 @@ class Melee {       // melee npcs
   constructor(x, y, r) {
     this.x = x;
     this.y = y;
-    this.r= 60;
+    this.r = 60;
   }
 
   display() {
     imageMode(CENTER);
-    image(npc1, this.x, this.y, r*2+20, r*2);
+    image(npc1, this.x, this.y, r * 2 + 20, r * 2);
   }
 
-  dissapear(){
-    this.r= this.r - r*2+20;
+  dissapear() {
+    this.r = this.r - r * 2;
   }
 
   move() {
