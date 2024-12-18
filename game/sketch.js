@@ -7,21 +7,19 @@
 
 let x = 0;
 let y = 0;
-let playerX = 0;
-let playerY = 0;
+let heroX = 0;
+let heroY = 0;
 let hero;
 let player;
-
 let npc1;
 let npc2;
-let enemiesM = [];
-let enemiesR = [];
+let melees = [];
+let snipers = [];
 let ball = [];
 let startTimer = 0;
 let rangedWidth;
 let rangedHeight;
 let spells = [];
-let melee = [];
 let r = 60;
 
 
@@ -35,7 +33,6 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   hero = new Character();
-  melee = new Melee();
   spawnMele();
   spawnRanged();
   for (let i = 0; i < 10; i++) {
@@ -48,14 +45,14 @@ function setup() {
 function spawnRanged() {
   for (let i = 0; i < 1000; i++) {
     let rangedWidth = 100 + i * 190;
-    enemiesR.push(new Ranged(rangedWidth, rangedHeight));
+    snipers.push(new Ranged(rangedWidth, rangedHeight));
   }
 }
 
 function spawnMele() {
   for (let i = 0; i < 10; i++) {
 
-    enemiesM.push(new Melee(random(width), 20));
+    melees.push(new Melee(random(width), 20));
 
   }
 }
@@ -73,12 +70,12 @@ function draw() {
   for (let i = 0; i < 10; i++) {
     ball[i].display();
   }
-  for (let i = 0; i < enemiesM.length; i++) {
-    enemiesM[i].display();
-    enemiesM[i].move();
+  for (let i = 0; i < melees.length; i++) {
+    melees[i].display();
+    melees[i].move();
   }
   for (let i = 0; i < 10; i++) {
-    enemiesR[i].display();
+    snipers[i].display();
   }
   let ellapseTime = millis() - startTimer;
   if (ellapseTime > 4000) {
@@ -87,16 +84,27 @@ function draw() {
   }
   for (let i = 0; i < spells.length; i++) {
     spells[i].display();
-    spells[i].move();
-   
+    for (let j = 0; j < melees.length; j++) {
+      if (spells[i].hits(melees[j])) {
+        melees.pop();
+      }
+    }
   }
 
-  print(currentMouseX, currentMouseY);
 
+  //character being hit
+  for(let h of melees){
+    for(let i of spells){
+      if(i.x >= h.left && i.x <= h.right && i.y >= h.top && i.y <= h.bottom){
+        h.pop();
+      }
+    }
+
+    
+  }
 }
-
 class Character {
-  constructor(x, y, move) {
+  constructor() {
     this.x = width / 2;
     this.y = height / 2;
 
@@ -105,7 +113,8 @@ class Character {
   display() {
     imageMode(CENTER);
     image(player, this.x, this.y, r * 2, r * 2 + 20);
-
+    heroX = this.x;
+    heroY = this.y;
   }
 
 
@@ -144,20 +153,21 @@ class Character {
 }
 
 
-// clicking function to give spell a direction to go
+
 let currentMouseX = 0;
 let currentMouseY = 0;
 function mousePressed() {
-  currentMouseX = mouseX;
+  currentMouseX = mouseX; //check actual position of the mouse
   currentMouseY = mouseY;
-  spells.push(new Spell(hero.x, hero.y));
+  spells.push(new Spell(hero.x, hero.y)); //cast the spell
 }
 
 
 class Spell {    //MY SPELL
-  constructor(x,y) {
+  constructor(x, y, r) {
+    this.r = r;
     this.pos = createVector(x, y);
-    this.target = createVector(mouseX-this.pos.x,mouseY-this.pos.y);
+    this.target = createVector(mouseX - this.pos.x, mouseY - this.pos.y);
     this.target.normalize();
     this.target.mult(5);
   }
@@ -166,46 +176,24 @@ class Spell {    //MY SPELL
     noStroke();
     fill('crimson');
     ellipse(this.pos.x, this.pos.y, r / 2, r / 3);
-    if (this.pos.x !== currentMouseX){
-      if(this.pos.y !== currentMouseY){
-        this.pos.add(this.target);
+    if (this.pos.x !== currentMouseX) {  // for the spells not to interfere with a new spell cast, stopping the program
+      if (this.pos.y !== currentMouseY) {
+        this.pos.add(this.target); // the spells move directly to where the mouse is pressed
+        // if the spell does not connect it goes forever, leaving the screen 
       }
     }
-    this.pos.add(this.target);
-    // if(this.pos.x !== currentMouseX){
-    //   if(this.pos.x < currentMouseX){
-    //     this.pos.x +=10;
-    //   }
-    //   else{ 
-    //     this.pos.x -=10;
-    //   }
-    // }
-    // if(this.pos.y !== currentMouseY){
-    //   if(this.pos.y < currentMouseY){
-    //     this.pos.y +=10;
-    //   }
-    //   else{
-    //     this.pos.y -=10;
-    //   }
-    // }
+
 
   }
 
-  hits(enemiesM) {
-    let d = dist(this.x, this.y, enemiesM.x, enemiesM.y);
-    if (d < this.r + enemiesM.r) {
+  hits(Melee) {  //player succesfully hits his spell, killing the minion and making the spell dissappear
+    let d = dist(this.pos.x, this.pos.y, Melee.x, Melee.y);
+    if (d < this.r + Melee.r) {
       return true;
     }
     else {
       return false;
     }
-  }
-
-
-  move() {  // player shoots, the spells casts
-    this.y = this.y - 1;
-
-
   }
 
 
@@ -215,20 +203,35 @@ class Melee {       // melee npcs
   constructor(x, y, r) {
     this.x = x;
     this.y = y;
-    this.r = 60;
+    this.r = r;
+
+
+    //hitbox
+    this.right;
+    this.left;
+    this.top;
+    this.bottom;
   }
 
   display() {
     imageMode(CENTER);
-    image(npc1, this.x, this.y, r * 2 + 20, r * 2);
+    image(npc1, this.x, this.y + 100, r * 2 , r * 2);
+
+    
+
+    //hitbox
+    this.right = this.x - 60;
+    this.left = this.x + 60;
+    this.bottom = this.y + 60;
+    this.top = this.y - 60;
+
+  
   }
 
-  dissapear() {
-    this.r = this.r - r * 2;
-  }
 
   move() {
-
+    // this.y = heroY;
+    // this.x = heroX;
   }
 
 
