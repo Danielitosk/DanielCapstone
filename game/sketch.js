@@ -51,9 +51,7 @@ function spawnRanged() {
 
 function spawnMele() {
   for (let i = 0; i < 10; i++) {
-
     melees.push(new Melee(random(width), 20));
-
   }
 }
 
@@ -84,66 +82,68 @@ function draw() {
   }
   for (let i = 0; i < spells.length; i++) {
     spells[i].display();
-    for (let j = 0; j < melees.length; j++) {
-      if (spells[i].hits(melees[j])) {
-        melees.pop();
+
+
+  }
+  
+  // Melee minions attack the 
+  for (let Melee of melees) {
+    Melee.y += 0.4;
+    //Melee.x = heroX;
+  }
+
+  for (let Melee of melees) {
+    for (let Spell of spells) {
+      if (dist(Melee.x, Melee.y, Spell.x, Spell.y) < 120) {
+        melees.splice(melees.indexOf(Melee), 4);
+        spells.splice(spells.indexOf(Spell), 4);
       }
     }
   }
 
 
-  //character being hit
-  for(let h of melees){
-    for(let i of spells){
-      if(i.x >= h.left && i.x <= h.right && i.y >= h.top && i.y <= h.bottom){
-        h.pop();
-      }
-    }
-
-    
-  }
 }
 class Character {
   constructor() {
+    
     this.x = width / 2;
     this.y = height / 2;
+    heroX = this.x;
+    heroY = this.y;
 
   }
 
   display() {
     imageMode(CENTER);
-    image(player, this.x, this.y, r * 2, r * 2 + 20);
-    heroX = this.x;
-    heroY = this.y;
+    image(player, heroX, heroY, r * 2, r * 2 + 20);
+    
   }
-
-
 
   move() {  // player movement and check for borders in the canvas 
 
     if (keyIsPressed) {
       if (keyCode === 68) {  // move to the right
-        this.x += 6;
-        if (this.x >= windowWidth - 20) {     // check right border
-          this.x = windowWidth - 20;
+        heroX += 6;
+        if (heroX >= windowWidth - 20) {     // check right border
+          heroX = windowWidth - 20;
         }
       }
       if (keyCode === 65) {  // move to the left
-        this.x -= 6;
-        if (this.x <= 20) {     // check left border
-          this.x = 20;
+        heroX -= 6;
+        if (heroX <= 20) {     // check left border
+          heroX = 20;
         }
       }
       if (keyCode === 83) {  // move down
-        this.y += 6;
-        if (this.y >= windowHeight - 175) {   // check lower border
-          this.y = windowHeight - 175;
+        heroY += 6;
+        if (heroY >= windowHeight - 175) {   // check lower border
+          heroY = windowHeight - 175;
         }
       }
       if (keyCode === 87) {  //move up
-        this.y -= 6;
-        if (this.y <= 20) {    // check upper border
-          this.y = 20;
+        heroY -= 6;
+        if (heroY <= 20) {    // check upper border
+          heroY = 20;
         }
       }
     }
@@ -159,7 +159,7 @@ let currentMouseY = 0;
 function mousePressed() {
   currentMouseX = mouseX; //check actual position of the mouse
   currentMouseY = mouseY;
-  spells.push(new Spell(hero.x, hero.y)); //cast the spell
+  spells.push(new Spell(heroX, heroY)); //cast the spell
 }
 
 
@@ -169,7 +169,7 @@ class Spell {    //MY SPELL
     this.pos = createVector(x, y);
     this.target = createVector(mouseX - this.pos.x, mouseY - this.pos.y);
     this.target.normalize();
-    this.target.mult(5);
+    this.target.mult(10);
   }
 
   display() {
@@ -183,19 +183,7 @@ class Spell {    //MY SPELL
       }
     }
 
-
   }
-
-  hits(Melee) {  //player succesfully hits his spell, killing the minion and making the spell dissappear
-    let d = dist(this.pos.x, this.pos.y, Melee.x, Melee.y);
-    if (d < this.r + Melee.r) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
 
 }
 
@@ -215,9 +203,9 @@ class Melee {       // melee npcs
 
   display() {
     imageMode(CENTER);
-    image(npc1, this.x, this.y + 100, r * 2 , r * 2);
+    image(npc1, this.x, this.y + 100, r * 2, r * 2);
 
-    
+
 
     //hitbox
     this.right = this.x - 60;
@@ -225,13 +213,11 @@ class Melee {       // melee npcs
     this.bottom = this.y + 60;
     this.top = this.y - 60;
 
-  
+
   }
 
-
   move() {
-    // this.y = heroY;
-    // this.x = heroX;
+
   }
 
 
