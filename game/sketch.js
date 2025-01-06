@@ -50,9 +50,11 @@ function spawnRanged() {
 }
 
 function spawnMele() {
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     melees.push(new Melee(random(width), 20));
+    
   }
+
 }
 
 
@@ -76,7 +78,7 @@ function draw() {
     snipers[i].display();
   }
   let ellapseTime = millis() - startTimer;
-  if (ellapseTime > 4000) {
+  if (ellapseTime > 2500) {
     spawnMele();
     startTimer = millis();
   }
@@ -88,22 +90,34 @@ function draw() {
   
   // Melee minions attack the 
   for (let Melee of melees) {
-    Melee.y += 0.4;
+    Melee.y += 1.3;
+    if (Melee.x < hero.x){
+      Melee.x += 1;
+    }
+    if (Melee.x > hero.x){
+      Melee.x -= 1;
+    }
     //Melee.x = heroX;
   }
 
   for (let Melee of melees) {
     for (let Spell of spells) {
-      if (dist(Melee.x, Melee.y, Spell.x, Spell.y) < 120) {
-        melees.splice(melees.indexOf(Melee), 4);
-        spells.splice(spells.indexOf(Spell), 4);
+      if (dist(Melee.x, Melee.y-90, Spell.pos.x, Spell.pos.y) < 60) {
+        //print("hit");
+        melees.splice(melees.indexOf(Melee), 1);
+        spells.splice(spells.indexOf(Spell), 1);
+      }
+    }
+    for (let i=0; i<hero.length; i++) {
+      if (dist(hero.x, hero.y, Melee.x, Melee.y) < 100) {
+        hero.splice(hero.indexOf(hero), 1);
       }
     }
   }
 
 
 }
-class Character {
+class Character{
   constructor() {
     
     this.x = width / 2;
@@ -165,7 +179,7 @@ function mousePressed() {
 
 class Spell {    //MY SPELL
   constructor(x, y, r) {
-    this.r = r;
+    this.r =r;
     this.pos = createVector(x, y);
     this.target = createVector(mouseX - this.pos.x, mouseY - this.pos.y);
     this.target.normalize();
@@ -203,7 +217,7 @@ class Melee {       // melee npcs
 
   display() {
     imageMode(CENTER);
-    image(npc1, this.x, this.y + 100, r * 2, r * 2);
+    image(npc1, this.x, this.y - 100, r * 2, r * 2);
 
 
 
