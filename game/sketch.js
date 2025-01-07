@@ -21,7 +21,9 @@ let rangedWidth;
 let rangedHeight;
 let spells = [];
 let r = 60;
-
+let score = 0;
+let kill = 0;
+let n = 2;
 
 function preload() {
   forest = loadImage('assets/background.webp');
@@ -50,15 +52,20 @@ function spawnRanged() {
 }
 
 function spawnMele() {
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 2; i++) {
     melees.push(new Melee(random(width), 20));
-    
   }
 
 }
 
+function points() {
+  textSize(25);
+  textFont('Courier New');
+  fill('yellow');
+  score = int(millis()) + kill * 1000;
+  text("SCORE:" + score, windowWidth - 220, 40);
 
-
+}
 
 function draw() {
   background(220);
@@ -78,48 +85,49 @@ function draw() {
     snipers[i].display();
   }
   let ellapseTime = millis() - startTimer;
-  if (ellapseTime > 2500) {
+
+  if (ellapseTime > 3000) {
     spawnMele();
     startTimer = millis();
   }
+  
+
   for (let i = 0; i < spells.length; i++) {
     spells[i].display();
-
-
   }
-  
+
   // Melee minions attack the 
   for (let Melee of melees) {
     Melee.y += 1.3;
-    if (Melee.x < hero.x){
-      Melee.x += 1;
-    }
-    if (Melee.x > hero.x){
-      Melee.x -= 1;
-    }
-    //Melee.x = heroX;
-  }
+    // if (Melee.x < hero.x) {
+    //   Melee.x += 1;
+    // }
+    // if (Melee.x > hero.x) {
+    //   Melee.x -= 1;
+    // }
 
+  }
+  points()
   for (let Melee of melees) {
     for (let Spell of spells) {
-      if (dist(Melee.x, Melee.y-90, Spell.pos.x, Spell.pos.y) < 60) {
-        //print("hit");
+      if (dist(Melee.x, Melee.y - 90, Spell.pos.x, Spell.pos.y) < 60) {
+
         melees.splice(melees.indexOf(Melee), 1);
         spells.splice(spells.indexOf(Spell), 1);
+        kill += 1;  // player kills +1 enemy, counts for his final score
       }
     }
-    for (let i=0; i<hero.length; i++) {
+    for (let i = 0; i < hero.length; i++) {
       if (dist(hero.x, hero.y, Melee.x, Melee.y) < 100) {
-        hero.splice(hero.indexOf(hero), 1);
+        hero.splice(hero.indexOf(hero));
       }
     }
   }
 
-
 }
-class Character{
+class Character {
   constructor() {
-    
+
     this.x = width / 2;
     this.y = height / 2;
     heroX = this.x;
@@ -130,7 +138,7 @@ class Character{
   display() {
     imageMode(CENTER);
     image(player, heroX, heroY, r * 2, r * 2 + 20);
-    
+
   }
 
   move() {  // player movement and check for borders in the canvas 
@@ -179,7 +187,7 @@ function mousePressed() {
 
 class Spell {    //MY SPELL
   constructor(x, y, r) {
-    this.r =r;
+    this.r = r;
     this.pos = createVector(x, y);
     this.target = createVector(mouseX - this.pos.x, mouseY - this.pos.y);
     this.target.normalize();
