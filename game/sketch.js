@@ -24,6 +24,9 @@ let r = 60;
 let score = 0;
 let kill = 0;
 let n = 2;
+let gamestate = 1;
+
+
 
 function preload() {
   forest = loadImage('assets/background.webp');
@@ -44,6 +47,7 @@ function setup() {
 
 }
 
+
 function spawnRanged() {
   for (let i = 0; i < 1000; i++) {
     let rangedWidth = 100 + i * 190;
@@ -52,7 +56,7 @@ function spawnRanged() {
 }
 
 function spawnMele() {
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 5; i++) {
     melees.push(new Melee(random(width), 20));
   }
 
@@ -67,64 +71,98 @@ function points() {
 
 }
 
+function menu() {
+  background(100);
+  fill(250, 250, 250);
+  textSize(50);
+  textFont('Courier New');
+  text("GAME NAME", 400, 150);
+  fill('crimson');
+  textSize();
+  rect(500, 500, 50, 50, 10, 10, 10, 10);
+  fill();
+}
+
 function draw() {
-  background(220);
-  imageMode(CENTER);  //background image
-  image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
-  hero.display();
-  hero.move();
+  /////////////////////////////////////// GAMESTATE 0 ////////////////////////////////////////////
+  // MENU SCREEN
+  if (gamestate === 0) {
 
-  for (let i = 0; i < 10; i++) {
-    ball[i].display();
   }
-  for (let i = 0; i < melees.length; i++) {
-    melees[i].display();
-    melees[i].move();
-  }
-  for (let i = 0; i < 10; i++) {
-    snipers[i].display();
-  }
-  let ellapseTime = millis() - startTimer;
 
-  if (ellapseTime > 3000) {
-    spawnMele();
-    startTimer = millis();
+  ////////////////////////////////////// GAMESTATE 1 /////////////////////////////////////////////
+  // MAIN GAME
+
+  if (gamestate === 1) {
+    background(220);
+    imageMode(CENTER);  //background image
+    image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
+    hero.display();
+    hero.move();
+
+    for (let i = 0; i < 10; i++) {
+      ball[i].display();
+    }
+    for (let i = 0; i < melees.length; i++) {
+      melees[i].display();
+      melees[i].move();
+    }
+    for (let i = 0; i < 10; i++) {
+      snipers[i].display();
+    }
+    let ellapseTime = millis() - startTimer;
+
+    if (ellapseTime > 3000) {
+      spawnMele();
+      startTimer = millis();
+    }
+
+
+    for (let i = 0; i < spells.length; i++) {
+      spells[i].display();
+    }
+
+    // Melee minions attack the 
+    for (let Melee of melees) {
+      Melee.y += 1.3;
+      // if (Melee.x < hero.x) {
+      //   Melee.x += 1;
+      // }
+      // if (Melee.x > hero.x) {
+      //   Melee.x -= 1;
+      // }
+
+    }
+    points();
+    for (let Melee of melees) {
+      for (let Spell of spells) {
+        if (dist(Melee.x, Melee.y - 90, Spell.pos.x, Spell.pos.y) < 60) {
+
+          melees.splice(melees.indexOf(Melee), 1);
+          spells.splice(spells.indexOf(Spell), 1);
+          kill += 1;  // player kills +1 enemy, counts for his final score
+        }
+      }
+
+      if (dist(hero.x, hero.y, Melee.x, Melee.y) < 100) {
+        gamestate += 1;
+      }
+
+    }
   }
   
 
-  for (let i = 0; i < spells.length; i++) {
-    spells[i].display();
-  }
 
-  // Melee minions attack the 
-  for (let Melee of melees) {
-    Melee.y += 1.3;
-    // if (Melee.x < hero.x) {
-    //   Melee.x += 1;
-    // }
-    // if (Melee.x > hero.x) {
-    //   Melee.x -= 1;
-    // }
+  //////////////////////////////////// GAMESTATE 2 ////////////////////////////////////
 
-  }
-  points()
-  for (let Melee of melees) {
-    for (let Spell of spells) {
-      if (dist(Melee.x, Melee.y - 90, Spell.pos.x, Spell.pos.y) < 60) {
+  // GAME OVER SCREEN
+  if (gamestate===2){
 
-        melees.splice(melees.indexOf(Melee), 1);
-        spells.splice(spells.indexOf(Spell), 1);
-        kill += 1;  // player kills +1 enemy, counts for his final score
-      }
-    }
-    for (let i = 0; i < hero.length; i++) {
-      if (dist(hero.x, hero.y, Melee.x, Melee.y) < 100) {
-        hero.splice(hero.indexOf(hero));
-      }
-    }
   }
 
 }
+
+
 class Character {
   constructor() {
 
@@ -137,7 +175,7 @@ class Character {
 
   display() {
     imageMode(CENTER);
-    image(player, heroX, heroY, r * 2, r * 2 + 20);
+    image(player, heroX, heroY, r * 2 - 20, r * 2);
 
   }
 
