@@ -24,7 +24,7 @@ let r = 60;
 let score = 0;
 let kill = 0;
 let n = 2;
-let gamestate = 1;
+let gamestate = 0;
 
 
 
@@ -71,22 +71,51 @@ function points() {
 
 }
 
+let buttoncolor = 'crimson';
+let trianglecolor = 250;
+
+function playbutton() {
+  fill(buttoncolor);
+  textSize();
+  rect(width / 2, height / 2, 300, 200, 10, 10, 10, 10);
+  fill(trianglecolor);
+  triangle(width / 2 - 40, height / 2 - 80, width / 2 + 60, height / 2 + 5, width / 2 - 40, height / 2 + 80);
+  
+  image(player, 300, 500, 500, 500);
+  if (mouseX <= width / 2 + 150 && mouseX >= width/2 -150 && mouseY <= height/2 +100 && mouseY >= height/2 -100) {
+    buttoncolor= color(100), trianglecolor = color(200);
+    
+  }
+  
+  else {
+    buttoncolor = 'crimson';
+    trianglecolor = 'white';
+  }
+  print(trianglecolor)
+}
+
+
 function menu() {
-  background(100);
-  fill(250, 250, 250);
+  rectMode(CENTER);
+  textAlign(CENTER);
+  imageMode(CENTER);
+  image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
+  fill('violet');
   textSize(50);
   textFont('Courier New');
-  text("GAME NAME", 400, 150);
-  fill('crimson');
-  textSize();
-  rect(500, 500, 50, 50, 10, 10, 10, 10);
-  fill();
+  text("GAME NAME", width / 2, 150);
+  textSize(30);
+  fill(250);
+  text("Press button to play", width / 2, 350);
+  playbutton();
 }
 
 function draw() {
   /////////////////////////////////////// GAMESTATE 0 ////////////////////////////////////////////
   // MENU SCREEN
   if (gamestate === 0) {
+
+    menu();
 
   }
 
@@ -125,12 +154,7 @@ function draw() {
     // Melee minions attack the 
     for (let Melee of melees) {
       Melee.y += 1.3;
-      // if (Melee.x < hero.x) {
-      //   Melee.x += 1;
-      // }
-      // if (Melee.x > hero.x) {
-      //   Melee.x -= 1;
-      // }
+
 
     }
     points();
@@ -144,19 +168,27 @@ function draw() {
         }
       }
 
-      if (dist(hero.x, hero.y, Melee.x, Melee.y) < 100) {
-        gamestate += 1;
+
+      if (dist(heroX, heroY + 100, Melee.x, Melee.y) < 100) {
+        gamestate = 2;
       }
 
     }
+
   }
-  
+
 
 
   //////////////////////////////////// GAMESTATE 2 ////////////////////////////////////
 
   // GAME OVER SCREEN
-  if (gamestate===2){
+  if (gamestate === 2) {
+    background(120, 120, 120);
+    textAlign(CENTER);
+    textSize(50);
+    textFont('Courier New');
+    text("GAME OVER", windowWidth / 2, windowHeight / 2);
+
 
   }
 
@@ -166,8 +198,8 @@ function draw() {
 class Character {
   constructor() {
 
-    this.x = width / 2;
-    this.y = height / 2;
+    this.x = windowWidth / 2;
+    this.y = windowHeight / 2;
     heroX = this.x;
     heroY = this.y;
 
@@ -175,7 +207,7 @@ class Character {
 
   display() {
     imageMode(CENTER);
-    image(player, heroX, heroY, r * 2 - 20, r * 2);
+    image(player, heroX, heroY, r * 2, r * 2);
 
   }
 
