@@ -71,27 +71,31 @@ function points() {
 
 }
 
-let buttoncolor = 'crimson';
+let buttoncolor = 'blueViolet';
 let trianglecolor = 250;
 
 function playbutton() {
+  noStroke();
   fill(buttoncolor);
   textSize();
   rect(width / 2, height / 2, 300, 200, 10, 10, 10, 10);
   fill(trianglecolor);
   triangle(width / 2 - 40, height / 2 - 80, width / 2 + 60, height / 2 + 5, width / 2 - 40, height / 2 + 80);
-  
+
   image(player, 300, 500, 500, 500);
-  if (mouseX <= width / 2 + 150 && mouseX >= width/2 -150 && mouseY <= height/2 +100 && mouseY >= height/2 -100) {
-    buttoncolor= color(100), trianglecolor = color(200);
-    
+  if (mouseX <= width / 2 + 150 && mouseX >= width / 2 - 150 && mouseY <= height / 2 + 100 && mouseY >= height / 2 - 100) {
+    buttoncolor = color(100), trianglecolor = color(200);
+
   }
-  
+
   else {
-    buttoncolor = 'crimson';
+    buttoncolor = 'blueViolet';
     trianglecolor = 'white';
   }
-  print(trianglecolor)
+  if (mouseX <= width / 2 + 150 && mouseX >= width / 2 - 150 && mouseY <= height / 2 + 100 && mouseY >= height / 2 - 100 && mouseIsPressed === true) {
+    gamestate = 1;
+  }
+
 }
 
 
@@ -101,28 +105,41 @@ function menu() {
   imageMode(CENTER);
   image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
   fill('violet');
-  textSize(50);
+  textSize(70);
   textFont('Courier New');
-  text("GAME NAME", width / 2, 150);
+  text("Wizard vs Evil Forces", width / 2, 150);
   textSize(30);
   fill(250);
   text("Press button to play", width / 2, 350);
   playbutton();
+  fill('IVORY');
+  text("Controls", width * 0.8, 250);
+
+  text("WASD: Player movement", width * 0.8, 400);
+
+  text("Click: Shoot", width * 0.8, 500);
+
+  text("Esc: Menu", width * 0.8, 600);
 }
+
+
 
 function draw() {
   /////////////////////////////////////// GAMESTATE 0 ////////////////////////////////////////////
   // MENU SCREEN
   if (gamestate === 0) {
-
     menu();
-
   }
 
   ////////////////////////////////////// GAMESTATE 1 /////////////////////////////////////////////
   // MAIN GAME
 
   if (gamestate === 1) {
+    if (keyIsPressed) {
+      if (keyCode === 27) {
+        gamestate = 0;
+      }
+    }
     background(220);
     imageMode(CENTER);  //background image
     image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
@@ -153,14 +170,13 @@ function draw() {
 
     // Melee minions attack the 
     for (let Melee of melees) {
-      Melee.y += 1.3;
-
+      Melee.move();
 
     }
     points();
     for (let Melee of melees) {
       for (let Spell of spells) {
-        if (dist(Melee.x, Melee.y - 90, Spell.pos.x, Spell.pos.y) < 60) {
+        if (dist(Melee.pos.x, Melee.pos.y - 90, Spell.pos.x, Spell.pos.y) < 60) {
 
           melees.splice(melees.indexOf(Melee), 1);
           spells.splice(spells.indexOf(Spell), 1);
@@ -169,12 +185,12 @@ function draw() {
       }
 
 
-      if (dist(heroX, heroY + 100, Melee.x, Melee.y) < 100) {
+      if (dist(hero.pos.x, hero.pos.y + 100, Melee.pos.x, Melee.pos.y) < 100) {
         gamestate = 2;
       }
 
     }
-
+   
   }
 
 
@@ -183,25 +199,34 @@ function draw() {
 
   // GAME OVER SCREEN
   if (gamestate === 2) {
+    if (keyIsPressed) {
+      if (keyCode === 32) {
+        gamestate = 1;
+      }
+      else if (keyCode === 27) {
+        gamestate = 0;
+      }
+    }
     background(120, 120, 120);
     textAlign(CENTER);
-    textSize(50);
+    textSize(70);
+    fill('yellow');
     textFont('Courier New');
     text("GAME OVER", windowWidth / 2, windowHeight / 2);
-
-
+    textSize(30);
+    text("Press space to restart", windowWidth / 2, windowHeight - 250);
+    text("Esc to leave", windowWidth / 2, windowHeight - 200);
   }
+
 
 }
 
 
 class Character {
   constructor() {
-
-    this.x = windowWidth / 2;
-    this.y = windowHeight / 2;
-    heroX = this.x;
-    heroY = this.y;
+    this.pos = createVector(width / 2, height / 2);
+    heroX = this.pos.x;
+    heroY = this.pos.y;
 
   }
 
@@ -212,30 +237,31 @@ class Character {
   }
 
   move() {  // player movement and check for borders in the canvas 
-
+    heroX = this.pos.x;
+    heroY = this.pos.y;
     if (keyIsPressed) {
       if (keyCode === 68) {  // move to the right
-        heroX += 6;
-        if (heroX >= windowWidth - 20) {     // check right border
-          heroX = windowWidth - 20;
+        hero.pos.x += 6;
+        if (hero.pos.x >= windowWidth - 20) {     // check right border
+          hero.pos.x = windowWidth - 20;
         }
       }
       if (keyCode === 65) {  // move to the left
-        heroX -= 6;
-        if (heroX <= 20) {     // check left border
-          heroX = 20;
+        hero.pos.x -= 6;
+        if (hero.pos.x <= 20) {     // check left border
+          hero.pos.x = 20;
         }
       }
       if (keyCode === 83) {  // move down
-        heroY += 6;
-        if (heroY >= windowHeight - 175) {   // check lower border
-          heroY = windowHeight - 175;
+        hero.pos.y += 6;
+        if (hero.pos.y >= windowHeight - 175) {   // check lower border
+          hero.pos.y = windowHeight - 175;
         }
       }
       if (keyCode === 87) {  //move up
-        heroY -= 6;
-        if (heroY <= 20) {    // check upper border
-          heroY = 20;
+        hero.pos.y -= 6;
+        if (hero.pos.y <= 20) {    // check upper border
+          hero.pos.y = 20;
         }
       }
     }
@@ -281,10 +307,9 @@ class Spell {    //MY SPELL
 
 class Melee {       // melee npcs
   constructor(x, y, r) {
-    this.x = x;
-    this.y = y;
+    this.pos = createVector(x, y);
     this.r = r;
-
+    this.vel = createVector(0, 0);
 
     //hitbox
     this.right;
@@ -295,21 +320,23 @@ class Melee {       // melee npcs
 
   display() {
     imageMode(CENTER);
-    image(npc1, this.x, this.y - 100, r * 2, r * 2);
-
-
+    image(npc1, this.pos.x, this.pos.y - 100, r * 2, r * 2);
 
     //hitbox
-    this.right = this.x - 60;
-    this.left = this.x + 60;
-    this.bottom = this.y + 60;
-    this.top = this.y - 60;
+    this.right = this.pos.x - 60;
+    this.left = this.pos.x + 60;
+    this.bottom = this.pos.y + 60;
+    this.top = this.pos.y - 60;
 
 
   }
 
   move() {
+    this.vel = p5.Vector.sub(hero.pos, this.pos);
+    this.vel.normalize();
+    this.vel.mult(2);
 
+    this.pos.add(this.vel);
   }
 
 
