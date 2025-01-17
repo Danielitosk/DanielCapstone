@@ -12,10 +12,8 @@ let heroY = 0;
 let hero;
 let player;
 let npc1;
-let npc2;
 let melees = [];
-let snipers = [];
-let ball = [];
+let bullets = [];
 let startTimer = 0;
 let rangedWidth;
 let rangedHeight;
@@ -25,41 +23,54 @@ let score = 0;
 let kill = 0;
 let n = 2;
 let gamestate = 0;
-
-
+let meleeX = true;
+let bulletX = true;
 
 function preload() {
   forest = loadImage('assets/background.webp');
   player = loadImage('assets/maincharacter.png');
   npc1 = loadImage('assets/meleenpc.png ');
-  npc2 = loadImage('assets/ranged.png');
+  menusong = loadSound('assets/01 Title Theme.mp3');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   hero = new Character();
+  
   spawnMele();
-  spawnRanged();
-  for (let i = 0; i < 10; i++) {
-    let rangedWidth = 100 + i * 190;
-    ball.push(new Lightball(rangedWidth, 900));
-  }
-
 }
 
+function shot() { // enemy spells against player
 
-function spawnRanged() {
-  for (let i = 0; i < 1000; i++) {
-    let rangedWidth = 100 + i * 190;
-    snipers.push(new Ranged(rangedWidth, rangedHeight));
+  for (let i = 0; i < 1; i++) {
+    if (bulletX === true) {
+      bullets.push(new Lightball(0, random(height)));
+      bullets.push(new Lightball(random(width), windowHeight));
+    }
+
+    for (let i = 0; i < 2; i++) {
+      bulletX = false;
+      bullets.push(new Lightball(windowWidth + 100, random(height)));
+      bullets.push(new Lightball(random(width), 0));
+      bulletX = true;
+    }
   }
 }
 
 function spawnMele() {
-  for (let i = 0; i < 5; i++) {
-    melees.push(new Melee(random(width), 20));
+  for (let i = 0; i < 2; i++) {
+    if (meleeX === true) {
+      melees.push(new Melee(0, random(height)));
+      melees.push(new Melee(random(width), windowHeight));
+    }
   }
-
+  for (let i = 0; i < 2; i++) {
+    meleeX = false;
+    melees.push(new Melee(windowWidth, random(height)));
+    melees.push(new Melee(random(width), 0));
+    meleeX = true;
+  }
+ 
 }
 
 function points() {
@@ -98,8 +109,8 @@ function playbutton() {
 
 }
 
-
 function menu() {
+  menusong.play();
   rectMode(CENTER);
   textAlign(CENTER);
   imageMode(CENTER);
@@ -107,7 +118,7 @@ function menu() {
   fill('violet');
   textSize(70);
   textFont('Courier New');
-  text("Wizard vs Evil Forces", width / 2, 150);
+  text("Enchanted Forest", width / 2, 150);
   textSize(30);
   fill(250);
   text("Press button to play", width / 2, 350);
@@ -119,10 +130,23 @@ function menu() {
 
   text("Click: Shoot", width * 0.8, 500);
 
-  text("Esc: Menu", width * 0.8, 600);
+  text("Esc: Pause game", width * 0.8, 600);
 }
 
+function endscreen() {
+  image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
+  textAlign(CENTER);
+  textSize(70);
+  fill('yellow');
+  textFont('Courier New');
+  text("GAME OVER", windowWidth / 2, windowHeight / 2);
+  textSize(30);
 
+  text("Your Score:" + score, windowWidth / 2, windowHeight / 2 + 60);
+
+  text("Press space to try again!", windowWidth / 2, windowHeight - 290);
+
+}
 
 function draw() {
   /////////////////////////////////////// GAMESTATE 0 ////////////////////////////////////////////
@@ -143,84 +167,71 @@ function draw() {
     background(220);
     imageMode(CENTER);  //background image
     image(forest, windowWidth / 2, windowHeight / 2, windowWidth + 1, windowHeight);
+
+
+    //CALL DISPLAY AND MOVE FUNCTIONS
     hero.display();
     hero.move();
-
-    for (let i = 0; i < 10; i++) {
-      ball[i].display();
+    for (let i = 0; i < bullets.length; i++) {
+      bullets[i].display();
+      bullets[i].move();
     }
+    print(melees.length);
     for (let i = 0; i < melees.length; i++) {
       melees[i].display();
       melees[i].move();
     }
-    for (let i = 0; i < 10; i++) {
-      snipers[i].display();
-    }
-    let ellapseTime = millis() - startTimer;
-
-    if (ellapseTime > 3000) {
-      spawnMele();
-      startTimer = millis();
-    }
-
 
     for (let i = 0; i < spells.length; i++) {
       spells[i].display();
     }
 
-    // Melee minions attack the 
-    for (let Melee of melees) {
-      Melee.move();
+    // TIMER TO SPAWN MORE MINIONS AND CAST MORE BULLETS AS TIME GOES ON
+    let ellapseTime = millis() - startTimer;
 
+    if (ellapseTime > 3000) {
+      spawnMele();
+      shot();
+      startTimer = millis();
     }
-    points();
-    for (let Melee of melees) {
-      for (let Spell of spells) {
-        if (dist(Melee.pos.x, Melee.pos.y - 90, Spell.pos.x, Spell.pos.y) < 60) {
 
+
+
+
+    points(); // user score
+
+    for (let Melee of melees) { //CHECK IF PLAYER SPELLS HIT A MELEE MINION, IF IT DOES, ERASE MINION AND SPELL
+      for (let Spell of spells) {
+        if (dist(Melee.pos.x, Melee.pos.y, Spell.pos.x, Spell.pos.y) < 60) {
           melees.splice(melees.indexOf(Melee), 1);
           spells.splice(spells.indexOf(Spell), 1);
           kill += 1;  // player kills +1 enemy, counts for his final score
         }
       }
 
-
-      if (dist(hero.pos.x, hero.pos.y + 100, Melee.pos.x, Melee.pos.y) < 100) {
+      if (dist(hero.pos.x, hero.pos.y, Melee.pos.x, Melee.pos.y) < 110) { // CHECK IF MINION REACHES THE PLAYER, ENDING THE GAME (player loses)
         gamestate = 2;
       }
-
     }
-   
   }
-
-
 
   //////////////////////////////////// GAMESTATE 2 ////////////////////////////////////
 
   // GAME OVER SCREEN
   if (gamestate === 2) {
+
     if (keyIsPressed) {
       if (keyCode === 32) {
-        gamestate = 1;
-      }
-      else if (keyCode === 27) {
-        gamestate = 0;
+        if (gamestate === 2) {
+          location.reload(true);
+        }
       }
     }
     background(120, 120, 120);
-    textAlign(CENTER);
-    textSize(70);
-    fill('yellow');
-    textFont('Courier New');
-    text("GAME OVER", windowWidth / 2, windowHeight / 2);
-    textSize(30);
-    text("Press space to restart", windowWidth / 2, windowHeight - 250);
-    text("Esc to leave", windowWidth / 2, windowHeight - 200);
+    endscreen();
   }
-
-
+  //End of draw
 }
-
 
 class Character {
   constructor() {
@@ -232,7 +243,7 @@ class Character {
 
   display() {
     imageMode(CENTER);
-    image(player, heroX, heroY, r * 2, r * 2);
+    image(player, hero.pos.x, hero.pos.y, r * 2, r * 2);
 
   }
 
@@ -270,16 +281,12 @@ class Character {
 
 }
 
-
-
 let currentMouseX = 0;
 let currentMouseY = 0;
 function mousePressed() {
-  currentMouseX = mouseX; //check actual position of the mouse
-  currentMouseY = mouseY;
+
   spells.push(new Spell(heroX, heroY)); //cast the spell
 }
-
 
 class Spell {    //MY SPELL
   constructor(x, y, r) {
@@ -297,7 +304,6 @@ class Spell {    //MY SPELL
     if (this.pos.x !== currentMouseX) {  // for the spells not to interfere with a new spell cast, stopping the program
       if (this.pos.y !== currentMouseY) {
         this.pos.add(this.target); // the spells move directly to where the mouse is pressed
-        // if the spell does not connect it goes forever, leaving the screen 
       }
     }
 
@@ -311,23 +317,12 @@ class Melee {       // melee npcs
     this.r = r;
     this.vel = createVector(0, 0);
 
-    //hitbox
-    this.right;
-    this.left;
-    this.top;
-    this.bottom;
+
   }
 
   display() {
     imageMode(CENTER);
-    image(npc1, this.pos.x, this.pos.y - 100, r * 2, r * 2);
-
-    //hitbox
-    this.right = this.pos.x - 60;
-    this.left = this.pos.x + 60;
-    this.bottom = this.pos.y + 60;
-    this.top = this.pos.y - 60;
-
+    image(npc1, this.pos.x, this.pos.y, r * 2, r * 2);
 
   }
 
@@ -338,41 +333,28 @@ class Melee {       // melee npcs
 
     this.pos.add(this.vel);
   }
-
-
-}
-
-class Ranged {       // ranged npc
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-
-  }
-
-  display() {
-    imageMode(CENTER);
-    image(npc2, this.x, windowHeight - 50, 120, 120);
-  }
-
-
 }
 
 class Lightball {
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
+    this.pos = createVector(x, y);
+    this.vel = createVector(0, 0);
 
   }
 
   display() {
     noStroke();
     fill('cyan');
-    ellipse(this.x, this.y, 30, 25);
+    ellipse(this.pos.x, this.pos.x, 30, 25);
   }
 
   move() {
-    //enemies cast lightrays to kill character
+    //Cast lightrays to kill character
+    this.vel = p5.Vector.sub(hero.pos, this.pos);
+    this.vel.normalize();
+    this.vel.mult(3);
 
+    this.pos.add(this.vel);
 
   }
 }
