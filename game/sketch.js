@@ -13,7 +13,10 @@ let hero;
 let player;
 let npc1;
 let melees = [];
-let bullets = [];
+let bulletNorth = [];
+let bulletSouth = [];
+let bulletEast = [];
+let bulletWest = [];
 let startTimer = 0;
 let rangedWidth;
 let rangedHeight;
@@ -23,8 +26,8 @@ let score = 0;
 let kill = 0;
 let n = 2;
 let gamestate = 0;
-let meleeX = true;
-let bulletX = true;
+let meleeX = false;
+
 
 function preload() {
   forest = loadImage('assets/background.webp');
@@ -36,25 +39,24 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
   hero = new Character();
-  
   spawnMele();
+  shot();
 }
 
 function shot() { // enemy spells against player
-
-  for (let i = 0; i < 1; i++) {
-    if (bulletX === true) {
-      bullets.push(new Lightball(0, random(height)));
-      bullets.push(new Lightball(random(width), windowHeight));
-    }
-
-    for (let i = 0; i < 2; i++) {
-      bulletX = false;
-      bullets.push(new Lightball(windowWidth + 100, random(height)));
-      bullets.push(new Lightball(random(width), 0));
-      bulletX = true;
-    }
+  for (let i = 0; i < 5; i++) {
+    bulletEast.push(new Lightball(0, random(height)));
   }
+  for (let i = 0; i < 5; i++) {
+    bulletWest.push(new Lightball(windowWidth, random(height)));
+  }
+  for (let i = 0; i < 5; i++) {
+    bulletNorth.push(new Lightball(random(width), 0 ));
+  }
+  for (let i = 0; i < 5; i++) {
+    bulletSouth.push(new Lightball(random(width), windowHeight));
+  }
+  print(bulletEast);
 }
 
 function spawnMele() {
@@ -70,7 +72,6 @@ function spawnMele() {
     melees.push(new Melee(random(width), 0));
     meleeX = true;
   }
- 
 }
 
 function points() {
@@ -172,11 +173,8 @@ function draw() {
     //CALL DISPLAY AND MOVE FUNCTIONS
     hero.display();
     hero.move();
-    for (let i = 0; i < bullets.length; i++) {
-      bullets[i].display();
-      bullets[i].move();
-    }
-    print(melees.length);
+ 
+
     for (let i = 0; i < melees.length; i++) {
       melees[i].display();
       melees[i].move();
@@ -329,33 +327,26 @@ class Melee {       // melee npcs
   move() {
     this.vel = p5.Vector.sub(hero.pos, this.pos);
     this.vel.normalize();
-    this.vel.mult(2);
+    this.vel.mult(2.3);
 
     this.pos.add(this.vel);
   }
 }
 
-class Lightball {
+class ballLeft{
   constructor(x, y) {
-    this.pos = createVector(x, y);
-    this.vel = createVector(0, 0);
-
+    this.x = x;
+    this.y = random(height);
   }
 
   display() {
     noStroke();
     fill('cyan');
-    ellipse(this.pos.x, this.pos.x, 30, 25);
+    ellipse(this.x, this.y, 30, 25);
   }
 
   move() {
-    //Cast lightrays to kill character
-    this.vel = p5.Vector.sub(hero.pos, this.pos);
-    this.vel.normalize();
-    this.vel.mult(3);
-
-    this.pos.add(this.vel);
-
+    this.x = this.x +1;
   }
 }
 
